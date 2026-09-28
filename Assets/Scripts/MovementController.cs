@@ -1,35 +1,51 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class MovementController : MonoBehaviour
 {
-
-    [SerializeField]
-    PlayerStats stats;
-
-    Vector2 moveInput;
-
     [SerializeField]
     float moveSpeed = 5f;
 
-    //[SerializeField]
+    [SerializeField]
+    float jumpHeight = 2f;
+
+    [SerializeField]
+    float gravity = -9.81f;
+
+    Vector2 moveInput;
+    float verticalVelocity;
+
     CharacterController controller;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         controller = GetComponent<CharacterController>();
-
-        //Debug.Log(stats.Health);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        controller.Move(moveSpeed * Time.deltaTime * new Vector3(moveInput.x, 0, moveInput.y));
+        // Check if the player is standing on the ground
+        if (controller.isGrounded && verticalVelocity < 0)
+        {
+            verticalVelocity = -2f;
+        }
+
+        // Horizontal movement
+        Vector3 movement = new Vector3(
+            moveInput.x,
+            0,
+            moveInput.y
+        );
+
+        controller.Move(moveSpeed * Time.deltaTime * movement);
+
+        // Gravity
+        verticalVelocity += gravity * Time.deltaTime;
+
+        // Vertical movement
+        controller.Move(
+            Vector3.up * verticalVelocity * Time.deltaTime
+        );
     }
 
     public void OnMove(InputValue value)
@@ -39,6 +55,11 @@ public class MovementController : MonoBehaviour
 
     public void OnJump(InputValue value)
     {
-        stats.Health += 10;
+        if (value.isPressed && controller.isGrounded)
+        {
+            verticalVelocity = Mathf.Sqrt(
+                jumpHeight * -2f * gravity
+            );
+        }
     }
 }
