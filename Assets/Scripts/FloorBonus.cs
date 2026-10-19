@@ -1,5 +1,5 @@
-using StarterAssets;
 using UnityEngine;
+using StarterAssets;
 
 public class FloorBonus : MonoBehaviour
 {
@@ -16,77 +16,43 @@ public class FloorBonus : MonoBehaviour
 
     private bool used = false;
 
-    private ThirdPersonController affectedPlayerMovement;
-    private PlayerHealth affectedPlayerHealth;
-
     private void OnTriggerEnter(Collider other)
     {
+        if (!other.CompareTag("Player"))
+            return;
 
         if (used)
             return;
 
-        affectedPlayerMovement =
-            other.GetComponentInParent<ThirdPersonController>();
-
-        affectedPlayerHealth =
-            other.GetComponentInParent<PlayerHealth>();
-
         if (bonusType == BonusType.Speed)
         {
-            if(affectedPlayerMovement != null)
-{
+            FirstPersonController playerMovement =
+                other.GetComponent<FirstPersonController>();
 
-                affectedPlayerMovement.MoveSpeed += speedBonus;
-
-                used = true;
-            }
-        }
-        else if (bonusType == BonusType.Health)
-        {
-            if (affectedPlayerHealth != null)
+            if (playerMovement != null)
             {
+                playerMovement.MoveSpeed += speedBonus;
 
-                if (affectedPlayerHealth.currentHealth < 3)
-                {
-                    affectedPlayerHealth.currentHealth += healthBonus;
-
-                    if (affectedPlayerHealth.currentHealth > 3)
-                    {
-                        affectedPlayerHealth.currentHealth = 3;
-                    }
-                }
-
-                else if (affectedPlayerHealth.currentHealth == 3 &&
-                         affectedPlayerHealth.maxHealth == 3)
-                {
-                    affectedPlayerHealth.maxHealth = 4;
-                    affectedPlayerHealth.currentHealth = 4;
-                }
-
-                affectedPlayerHealth.UpdateHealthBar();
-
-                used = true;
+                Debug.Log("Speed increased! New speed: " +
+                    playerMovement.MoveSpeed);
             }
-        }
-    }
-
-    public void ResetBonus()
-    {
-        if (bonusType == BonusType.Speed)
-        {
-            if (affectedPlayerMovement != null)
-            {
-                affectedPlayerMovement.MoveSpeed -= speedBonus;
-            }
-
-            affectedPlayerMovement = null;
         }
 
         else if (bonusType == BonusType.Health)
         {
-            affectedPlayerHealth = null;
+            PlayerHealth playerHealth =
+                other.GetComponent<PlayerHealth>();
+
+            if (playerHealth != null)
+            {
+                playerHealth.maxHealth += healthBonus;
+                playerHealth.currentHealth += healthBonus;
+
+                Debug.Log("Health increased! New max health: " +
+                    playerHealth.maxHealth);
+            }
         }
 
-        used = false;
+        used = true;
     }
 }
